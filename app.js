@@ -6,19 +6,20 @@ var bodyParser = require('body-parser');
 var assert = require('assert');
 var logger = require('morgan');
 var path = require('path');
-var favicon = require('serve-favicon');
+// var favicon = require('serve-favicon');
 var port = process.env.PORT || 8080;
 var mongoUri = process.env.MONGOLAB_URI ||
         process.env.MONGOHQ_URL ||
         process.env.MONGODB_URI ||
         'mongodb://localhost/ureca';
 var GOOGLE_MAP_API = 'AIzaSyCUH4ybclQQPb9WiYYoY1gMLNyq3WaUQ1E';
+var ntu = require('./data/ntu.json');
 
 var app = express();
 
 
 // configure our server
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.engine('html', engines.nunjucks);
 app.set('view engine', 'html');
@@ -40,18 +41,19 @@ MongoClient.connect(mongoUri, function(err, db) {
         res.render('index');
     });
     app.get('/coordinates/ntu/', function(req, res) {
-        db.collection('ntu').aggregate([
-            {
-                $project: {
-                    _id: 0,
-                    name: '$name',
-                    lat: '$raw_data.location.lat',
-                    lng: '$raw_data.location.lng'
-                }
-            }
-        ]).toArray(function(err, docs) {
-            res.json(docs);
-        })
+        // db.collection('ntu').aggregate([
+        //     {
+        //         $project: {
+        //             _id: 0,
+        //             name: '$name',
+        //             lat: '$raw_data.location.lat',
+        //             lng: '$raw_data.location.lng'
+        //         }
+        //     }
+        // ]).toArray(function(err, docs) {
+        //     res.json(docs);
+        // })
+        res.send(ntu);
     });
     app.get('/coordinates/australia/', function(req, res) {
         db.collection('australia').aggregate([
