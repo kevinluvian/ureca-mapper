@@ -14,6 +14,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
         'mongodb://localhost/ureca';
 var GOOGLE_MAP_API = 'AIzaSyCUH4ybclQQPb9WiYYoY1gMLNyq3WaUQ1E';
 var ntu = require('./data/ntu.json');
+var australia = require('./data/australia.json');
 
 var app = express();
 
@@ -41,33 +42,40 @@ MongoClient.connect(mongoUri, function(err, db) {
         res.render('index');
     });
     app.get('/coordinates/ntu/', function(req, res) {
-        // db.collection('ntu').aggregate([
-        //     {
-        //         $project: {
-        //             _id: 0,
-        //             name: '$name',
-        //             lat: '$raw_data.location.lat',
-        //             lng: '$raw_data.location.lng'
-        //         }
-        //     }
-        // ]).toArray(function(err, docs) {
-        //     res.json(docs);
-        // })
-        res.send(ntu);
+        if (app.get('env') === 'development') {
+            db.collection('ntu').aggregate([
+                {
+                    $project: {
+                        _id: 0,
+                        name: '$name',
+                        lat: '$raw_data.location.lat',
+                        lng: '$raw_data.location.lng'
+                    }
+                }
+            ]).toArray(function(err, docs) {
+                res.json(docs);
+            })
+        } else {
+            res.send(ntu);
+        }
     });
     app.get('/coordinates/australia/', function(req, res) {
-        db.collection('australia').aggregate([
-            {
-                $project: {
-                    _id: 0,
-                    name: '$name',
-                    lat: '$raw_data.location.lat',
-                    lng: '$raw_data.location.lng'
+        if (app.get('env') === 'development') {
+            db.collection('australia').aggregate([
+                {
+                    $project: {
+                        _id: 0,
+                        name: '$name',
+                        lat: '$raw_data.location.lat',
+                        lng: '$raw_data.location.lng'
+                    }
                 }
-            }
-        ]).toArray(function(err, docs) {
-            res.json(docs);
-        })
+            ]).toArray(function(err, docs) {
+                res.json(docs);
+            })
+        } else {
+            res.send(australia);
+        }
     });
 
     // catch 404 and forward to error handler
