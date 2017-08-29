@@ -13,8 +13,6 @@ var mongoUri = process.env.MONGOLAB_URI ||
         process.env.MONGODB_URI ||
         'mongodb://localhost/ureca';
 var GOOGLE_MAP_API = 'AIzaSyCUH4ybclQQPb9WiYYoY1gMLNyq3WaUQ1E';
-var ntu = require('./data/ntu.json');
-var australia = require('./data/australia.json');
 
 var app = express();
 
@@ -33,16 +31,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 // make sure we can connect to database before starting server
-MongoClient.connect(mongoUri, function(err, db) {
+if (app.get('env') === 'development') {
+    MongoClient.connect(mongoUri, function(err, db) {
 
-    assert.equal(null, err);
-    console.log('Successfully connected to mongodb');
+        assert.equal(null, err);
+        console.log('Successfully connected to mongodb');
 
-    app.get('/', function(req, res) {
-        res.render('index');
-    });
-    app.get('/coordinates/ntu/', function(req, res) {
-        if (app.get('env') === 'development') {
+        app.get('/', function(req, res) {
+            res.render('index');
+        });
+
+        app.get('/coordinates/ntu/', function(req, res) {
             db.collection('ntu').aggregate([
                 {
                     $project: {
@@ -55,12 +54,8 @@ MongoClient.connect(mongoUri, function(err, db) {
             ]).toArray(function(err, docs) {
                 res.json(docs);
             })
-        } else {
-            res.send(ntu);
-        }
-    });
-    app.get('/coordinates/australia/', function(req, res) {
-        if (app.get('env') === 'development') {
+        });
+        app.get('/coordinates/australia/', function(req, res) {
             db.collection('australia').aggregate([
                 {
                     $project: {
@@ -73,9 +68,47 @@ MongoClient.connect(mongoUri, function(err, db) {
             ]).toArray(function(err, docs) {
                 res.json(docs);
             })
-        } else {
-            res.send(australia);
+        });
+
+        // catch 404 and forward to error handler
+        app.use(function(req, res, next) {
+          var err = new Error('Not Found');
+          err.status = 404;
+          next(err);
+        });
+
+        // error handlers
+
+        // development error handler
+        // will print stacktrace
+        if (app.get('env') === 'development') {
+          app.use(function(err, req, res, next) {
+            res.status(err.status || 500);
+            res.render('error', {
+              message: err.message,
+              error: err
+            });
+          });
         }
+
+        app.listen(port, function() {
+            console.log('Server listening on port 8080');
+        });
+
+    });
+} else {
+    var ntu = require('./data/ntu.json');
+    var australia = require('./data/australia.json');
+
+    app.get('/', function(req, res) {
+        res.render('index');
+    });
+
+    app.get('/coordinates/ntu/', function(req, res) {
+        res.send(ntu);
+    });
+    app.get('/coordinates/australia/', function(req, res) {
+        res.send(australia);
     });
 
     // catch 404 and forward to error handler
@@ -86,19 +119,6 @@ MongoClient.connect(mongoUri, function(err, db) {
     });
 
     // error handlers
-
-    // development error handler
-    // will print stacktrace
-    if (app.get('env') === 'development') {
-      app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-          message: err.message,
-          error: err
-        });
-      });
-    }
-
     // production error handler
     // no stacktraces leaked to user
     app.use(function(err, req, res, next) {
@@ -109,10 +129,7 @@ MongoClient.connect(mongoUri, function(err, db) {
       });
     });
 
-
-
     app.listen(port, function() {
         console.log('Server listening on port 8080');
     });
-
-});
+}
