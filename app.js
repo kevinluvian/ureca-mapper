@@ -10,7 +10,9 @@ var favicon = require('serve-favicon');
 var port = process.env.PORT || 8080;
 var mongoUri = process.env.MONGOLAB_URI ||
         process.env.MONGOHQ_URL ||
-        'mongodb://localhost/video';
+        process.env.MONGODB_URI ||
+        'mongodb://localhost/ureca';
+var GOOGLE_MAP_API = 'AIzaSyCUH4ybclQQPb9WiYYoY1gMLNyq3WaUQ1E';
 
 var app = express();
 
@@ -32,29 +34,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 MongoClient.connect(mongoUri, function(err, db) {
 
     assert.equal(null, err);
-    console.log('Successfully connected to mondodb');
+    console.log('Successfully connected to mongodb');
 
     app.get('/', function(req, res) {
-        db.collection('movies').find({}).toArray(function(err, docs) {
-            res.render('index', {'movies': docs} );
-        });
+        res.render('index');
     });
-
-    app.post('/', function(req, res) {
-        var title = req.body.movieTitle;
-        var year = req.body.movieYear;
-        var imdb = req.body.movieIMDB;
-
-        db.collection('movies').insertOne({
-                                            title: title,
-                                            year: year,
-                                            imdb: imdb
-                                        }, function(err, doc) {
-                                            assert.equal(null, err);
-                                            res.render('newmovie', {movie: req.body});
-                                        }
-        );
-
+    app.get('/coordinates/ntu/', function(req, res) {
+        db.collection('ntu').aggregate([
+            {
+                $project: {
+                    _id: 0,
+                    name: '$name',
+                    lat: '$raw_data.location.lat',
+                    lng: '$raw_data.location.lng'
+                }
+            }
+        ]).toArray(function(err, docs) {
+            res.json(docs);
+        })
+    });
+    app.get('/coordinates/australia/', function(req, res) {
+        db.collection('australia').aggregate([
+            {
+                $project: {
+                    _id: 0,
+                    name: '$name',
+                    lat: '$raw_data.location.lat',
+                    lng: '$raw_data.location.lng'
+                }
+            }
+        ]).toArray(function(err, docs) {
+            res.json(docs);
+        })
     });
 
     // catch 404 and forward to error handler
@@ -91,7 +102,7 @@ MongoClient.connect(mongoUri, function(err, db) {
 
 
     app.listen(port, function() {
-        console.log('Server listening on port 3000');
+        console.log('Server listening on port 8080');
     });
 
 });
