@@ -11,7 +11,7 @@ var port = process.env.PORT || 8080;
 var mongoUri = process.env.MONGOLAB_URI ||
         process.env.MONGOHQ_URL ||
         process.env.MONGODB_URI ||
-        'mongodb://localhost/ureca';
+        'mongodb://kevin:kevin@localhost/geodata';
 var GOOGLE_MAP_API = 'AIzaSyCUH4ybclQQPb9WiYYoY1gMLNyq3WaUQ1E';
 
 var app = express();
@@ -55,8 +55,8 @@ if (app.get('env') === 'development') {
                 res.json(docs);
             })
         });
-        app.get('/coordinates/australia/', function(req, res) {
-            db.collection('australia').aggregate([
+        app.get('/coordinates/us/', function(req, res) {
+            db.collection('us_raw').aggregate([
                 {
                     $project: {
                         _id: 0,
@@ -72,24 +72,22 @@ if (app.get('env') === 'development') {
 
         // catch 404 and forward to error handler
         app.use(function(req, res, next) {
-          var err = new Error('Not Found');
-          err.status = 404;
-          next(err);
+            var err = new Error('Not Found');
+            err.status = 404;
+            next(err);
         });
 
         // error handlers
 
         // development error handler
         // will print stacktrace
-        if (app.get('env') === 'development') {
-          app.use(function(err, req, res, next) {
+        app.use(function(err, req, res, next) {
             res.status(err.status || 500);
             res.render('error', {
-              message: err.message,
-              error: err
+                message: err.message,
+                error: err
             });
-          });
-        }
+        });
 
         app.listen(port, function() {
             console.log('Server listening on port 8080');
