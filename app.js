@@ -63,13 +63,21 @@ if (app.get('env') === 'development') {
             db.collection('log_parser').find({})
                 .toArray(function(err, docs) {
                     var docs2 = [];
-                    for (var i = 1; i < docs.length; i++) {
-                        docs2.push({
-                            x: docs[i].date_time,
-                            y: (docs[i].item_parsed - docs[i - 1].item_parsed) / docs[i].elapsed_time
+                    var docs3 = []
+                    var lastDate = 0;
+                    for (var i = 0; i < docs.length; i++) {
+                        if (docs[i].date_time.getDate() != lastDate) {
+                            docs2.push(docs[i]);
+                            lastDate = docs[i].date_time.getDate();
+                        }
+                    }
+                    for (var i = 1; i < docs2.length; i++) {
+                        docs3.push({
+                            x: docs2[i].date_time,
+                            y: (docs2[i].item_parsed - docs2[i - 1].item_parsed) / docs2[i].elapsed_time
                         })
                     }
-                    res.json(docs2);
+                    res.json(docs3);
                 })
         })
 
