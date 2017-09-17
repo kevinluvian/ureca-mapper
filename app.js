@@ -60,24 +60,17 @@ if (app.get('env') === 'development') {
         })
 
         app.get('/statistics_delta_data/', function(req, res) {
-            db.collection('log_parser').aggregate([
-                {
-                    $project: {
-                        _id: 0,
-                        x: '$date_time',
-                        y: '$item_parsed'
+            db.collection('log_parser').find({})
+                .toArray(function(err, docs) {
+                    var docs2 = [];
+                    for (var i = 1; i < docs.length; i++) {
+                        docs2.push({
+                            x: docs[i].date_time,
+                            y: (docs[i].item_parsed - docs[i - 1].item_parsed) / docs[i].elapsed_time
+                        })
                     }
-                }
-            ]).toArray(function(err, docs) {
-                var docs2 = [];
-                for (var i = 1; i < docs.length; i++) {
-                    docs2.push({
-                        x: docs[i].date_time,
-                        y: (docs[i].item_parsed - docs[i - 1].item_parsed) / docs[i].elapsed_time
-                    })
-                }
-                res.json(docs2);
-            })
+                    res.json(docs2);
+                })
         })
 
         app.get('/coordinates/ntu/', function(req, res) {
