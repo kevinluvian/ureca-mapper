@@ -74,7 +74,7 @@ if (app.get('env') === 'development') {
                     for (var i = 1; i < docs2.length; i++) {
                         docs3.push({
                             x: docs2[i].date_time,
-                            y: (docs2[i].item_parsed - docs2[i - 1].item_parsed) / docs2[i].elapsed_time
+                            y: (docs2[i].item_parsed - docs2[i - 1].item_parsed)
                         })
                     }
                     res.json(docs3);
