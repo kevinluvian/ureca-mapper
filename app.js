@@ -64,11 +64,11 @@ if (app.get('env') === 'development') {
                 .toArray(function(err, docs) {
                     var docs2 = [];
                     var docs3 = []
-                    var lastDate = 0;
+                    var lastHours = 0;
                     for (var i = 0; i < docs.length; i++) {
-                        if (docs[i].date_time.getDate() != lastDate) {
+                        if (docs[i].date_time.getHours() != lastHours) {
                             docs2.push(docs[i]);
-                            lastDate = docs[i].date_time.getDate();
+                            lastHours = docs[i].date_time.getHours();
                         }
                     }
                     for (var i = 1; i < docs2.length; i++) {
