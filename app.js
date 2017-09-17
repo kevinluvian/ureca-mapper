@@ -41,6 +41,20 @@ if (app.get('env') === 'development') {
             res.render('index');
         });
 
+        app.get('/statistics/', function(req, res) {
+            db.collection('log_parser').aggregate([
+                {
+                    $project: {
+                        _id: 0,
+                        x: '$date_time',
+                        y: '$item_parsed'
+                    }
+                }
+            ]).toArray(function(err, docs) {
+                res.json(docs);
+            })
+        })
+
         app.get('/coordinates/ntu/', function(req, res) {
             db.collection('ntu').aggregate([
                 {
