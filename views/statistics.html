@@ -64,7 +64,7 @@
                     }
                 }
             }
-            $.get('/statistics/' + location, function(resp) {
+            $.get('/statistics_data/' + location, function(resp) {
                 config.data.datasets[0].data = resp;
                 window.myLine.update();
             })
