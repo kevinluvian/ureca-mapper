@@ -42,6 +42,10 @@ if (app.get('env') === 'development') {
         });
 
         app.get('/statistics/', function(req, res) {
+            res.render('statistics');
+        })
+
+        app.get('/statistics_data/', function(req, res) {
             db.collection('log_parser').aggregate([
                 {
                     $project: {
